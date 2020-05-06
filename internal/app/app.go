@@ -3,12 +3,12 @@ package app
 import (
 	"sync"
 
-	"github.com/AlpacaLabs/account-confirmation/internal/grpc"
+	"github.com/AlpacaLabs/api-account-confirmation/internal/grpc"
 
-	"github.com/AlpacaLabs/account-confirmation/internal/configuration"
-	"github.com/AlpacaLabs/account-confirmation/internal/db"
-	"github.com/AlpacaLabs/account-confirmation/internal/http"
-	"github.com/AlpacaLabs/account-confirmation/internal/service"
+	"github.com/AlpacaLabs/api-account-confirmation/internal/configuration"
+	"github.com/AlpacaLabs/api-account-confirmation/internal/db"
+	"github.com/AlpacaLabs/api-account-confirmation/internal/http"
+	"github.com/AlpacaLabs/api-account-confirmation/internal/service"
 )
 
 type App struct {

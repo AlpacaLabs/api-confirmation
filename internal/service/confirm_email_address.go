@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"github.com/AlpacaLabs/account-confirmation/internal/db"
+	"github.com/AlpacaLabs/api-account-confirmation/internal/db"
 	confirmationV1 "github.com/AlpacaLabs/protorepo-confirmation-go/alpacalabs/confirmation/v1"
 )
 

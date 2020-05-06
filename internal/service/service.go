@@ -1,8 +1,8 @@
 package service
 
 import (
-	"github.com/AlpacaLabs/account-confirmation/internal/configuration"
-	"github.com/AlpacaLabs/account-confirmation/internal/db"
+	"github.com/AlpacaLabs/api-account-confirmation/internal/configuration"
+	"github.com/AlpacaLabs/api-account-confirmation/internal/db"
 )
 
 type Service struct {
