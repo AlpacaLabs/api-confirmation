@@ -9,7 +9,23 @@ import (
 
 func (s Service) ConfirmEmailAddress(ctx context.Context, request *confirmationV1.ConfirmEmailAddressRequest) (*confirmationV1.ConfirmEmailAddressResponse, error) {
 	if err := s.dbClient.RunInTransaction(ctx, func(ctx context.Context, tx db.Transaction) error {
-		// TODO lookup entity, mark as used, mark all codes for that email as confirmed
+
+		// Verify the code is valid
+		codeEntity, err := tx.GetEmailCode(ctx, *request)
+		if err != nil {
+			return err
+		}
+
+		// Mark code as used
+		if err := tx.MarkEmailCodeAsUsed(ctx, codeEntity.Id); err != nil {
+			return err
+		}
+
+		// Mark all codes for that email as stale
+		if err := tx.MarkEmailCodesAsStale(ctx, codeEntity.EmailAddressId); err != nil {
+			return err
+		}
+
 		return nil
 	}); err != nil {
 		return nil, err

@@ -9,7 +9,23 @@ import (
 
 func (s Service) ConfirmPhoneNumber(ctx context.Context, request *confirmationV1.ConfirmPhoneNumberRequest) (*confirmationV1.ConfirmPhoneNumberResponse, error) {
 	if err := s.dbClient.RunInTransaction(ctx, func(ctx context.Context, tx db.Transaction) error {
-		// TODO lookup entity, mark as used, mark all codes for that phone number as confirmed
+
+		// Verify the code is valid
+		codeEntity, err := tx.GetPhoneCode(ctx, *request)
+		if err != nil {
+			return err
+		}
+
+		// Mark code as used
+		if err := tx.MarkPhoneCodeAsUsed(ctx, codeEntity.Id); err != nil {
+			return err
+		}
+
+		// Mark all codes for that phone as stale
+		if err := tx.MarkPhoneCodesAsStale(ctx, codeEntity.PhoneNumberId); err != nil {
+			return err
+		}
+
 		return nil
 	}); err != nil {
 		return nil, err
