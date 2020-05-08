@@ -13,8 +13,8 @@ import (
 )
 
 type Transaction interface {
-	CreateEmailConfirmationCode(ctx context.Context, code confirmationV1.EmailAddressConfirmationCode) error
-	CreatePhoneConfirmationCode(ctx context.Context, code confirmationV1.PhoneNumberConfirmationCode) error
+	CreateEmailCode(ctx context.Context, code confirmationV1.EmailAddressConfirmationCode) error
+	CreatePhoneCode(ctx context.Context, code confirmationV1.PhoneNumberConfirmationCode) error
 
 	CreateTxobForEmailCode(ctx context.Context, code confirmationV1.EmailAddressConfirmationCode) error
 	CreateTxobForPhoneCode(ctx context.Context, code confirmationV1.PhoneNumberConfirmationCode) error
@@ -33,7 +33,7 @@ type txImpl struct {
 	tx *sql.Tx
 }
 
-func (tx *txImpl) CreateEmailConfirmationCode(ctx context.Context, in confirmationV1.EmailAddressConfirmationCode) error {
+func (tx *txImpl) CreateEmailCode(ctx context.Context, in confirmationV1.EmailAddressConfirmationCode) error {
 	var q sqlexp.Querier
 	q = tx.tx
 
@@ -51,7 +51,7 @@ VALUES($1, $2, $3, $4, $5, $6, $7)
 	return err
 }
 
-func (tx *txImpl) CreatePhoneConfirmationCode(ctx context.Context, in confirmationV1.PhoneNumberConfirmationCode) error {
+func (tx *txImpl) CreatePhoneCode(ctx context.Context, in confirmationV1.PhoneNumberConfirmationCode) error {
 	var q sqlexp.Querier
 	q = tx.tx
 
