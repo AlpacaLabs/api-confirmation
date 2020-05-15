@@ -3,6 +3,8 @@ package app
 import (
 	"sync"
 
+	"github.com/AlpacaLabs/api-account-confirmation/internal/async"
+
 	"github.com/AlpacaLabs/api-account-confirmation/internal/grpc"
 
 	"github.com/AlpacaLabs/api-account-confirmation/internal/configuration"
@@ -34,11 +36,17 @@ func (a App) Run() {
 
 	wg.Add(1)
 	httpServer := http.NewServer(a.config, svc)
-	httpServer.Run()
+	go httpServer.Run()
 
 	wg.Add(1)
 	grpcServer := grpc.NewServer(a.config, svc)
-	grpcServer.Run()
+	go grpcServer.Run()
+
+	wg.Add(1)
+	async.HandleCreateEmailAddressCode(a.config, svc)
+
+	wg.Add(1)
+	async.HandleCreatePhoneNumberCode(a.config, svc)
 
 	wg.Wait()
 }
