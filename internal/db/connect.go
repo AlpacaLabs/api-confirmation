@@ -1,19 +1,17 @@
 package db
 
 import (
-	"database/sql"
+	"context"
 	"fmt"
 
-	log "github.com/sirupsen/logrus"
+	configuration "github.com/AlpacaLabs/go-config"
+
+	"github.com/jackc/pgx/v4"
 )
 
-func Connect(user, password, host, dbname string) *sql.DB {
-	connectionString := fmt.Sprintf("user=%s password=%s host=%s dbname=%s sslmode=disable", user, password, host, dbname)
+func Connect(config configuration.SQLConfig) (*pgx.Conn, error) {
+	connectionString := fmt.Sprintf("user=%s password=%s host=%s dbname=%s sslmode=disable",
+		config.User, config.Pass, config.Host, config.Name)
 
-	dbConn, err := sql.Open("postgres", connectionString)
-	if err != nil {
-		log.Fatalf("failed to connect to db: %v", err)
-	}
-
-	return dbConn
+	return pgx.Connect(context.TODO(), connectionString)
 }

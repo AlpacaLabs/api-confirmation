@@ -26,6 +26,8 @@ func (s Service) ConfirmEmailAddress(ctx context.Context, request *confirmationV
 			return err
 		}
 
+		// TODO write to tx outbox
+
 		return nil
 	}); err != nil {
 		return nil, err

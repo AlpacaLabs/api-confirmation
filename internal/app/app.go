@@ -9,6 +9,7 @@ import (
 	"github.com/AlpacaLabs/api-account-confirmation/internal/db"
 	"github.com/AlpacaLabs/api-account-confirmation/internal/http"
 	"github.com/AlpacaLabs/api-account-confirmation/internal/service"
+	log "github.com/sirupsen/logrus"
 )
 
 type App struct {
@@ -22,7 +23,10 @@ func NewApp(c configuration.Config) App {
 }
 
 func (a App) Run() {
-	dbConn := db.Connect(a.config.DBUser, a.config.DBPass, a.config.DBHost, a.config.DBName)
+	dbConn, err := db.Connect(a.config.SQLConfig)
+	if err != nil {
+		log.Fatalf("failed to dial database: %v", err)
+	}
 	dbClient := db.NewClient(dbConn)
 	svc := service.NewService(a.config, dbClient)
 
