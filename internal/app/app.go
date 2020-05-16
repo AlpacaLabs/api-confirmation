@@ -43,10 +43,10 @@ func (a App) Run() {
 	go grpcServer.Run()
 
 	wg.Add(1)
-	async.HandleCreateEmailAddressCode(a.config, svc)
+	go async.HandleCreateEmailAddressCode(a.config, svc)
 
 	wg.Add(1)
-	async.HandleCreatePhoneNumberCode(a.config, svc)
+	go async.HandleCreatePhoneNumberCode(a.config, svc)
 
 	wg.Wait()
 }
