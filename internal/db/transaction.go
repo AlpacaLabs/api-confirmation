@@ -12,11 +12,10 @@ import (
 )
 
 type Transaction interface {
+	TransactionalOutbox
+
 	CreateEmailCode(ctx context.Context, code confirmationV1.EmailAddressConfirmationCode) error
 	CreatePhoneCode(ctx context.Context, code confirmationV1.PhoneNumberConfirmationCode) error
-
-	CreateTxobForEmailCode(ctx context.Context, code confirmationV1.EmailAddressConfirmationCode) error
-	CreateTxobForPhoneCode(ctx context.Context, code confirmationV1.PhoneNumberConfirmationCode) error
 
 	GetEmailCode(ctx context.Context, code confirmationV1.ConfirmEmailAddressRequest) (*confirmationV1.EmailAddressConfirmationCode, error)
 	GetPhoneCode(ctx context.Context, code confirmationV1.ConfirmPhoneNumberRequest) (*confirmationV1.PhoneNumberConfirmationCode, error)
@@ -30,11 +29,15 @@ type Transaction interface {
 
 type txImpl struct {
 	tx pgx.Tx
+	outboxImpl
 }
 
 func newTransaction(tx pgx.Tx) Transaction {
 	return &txImpl{
 		tx: tx,
+		outboxImpl: outboxImpl{
+			tx: tx,
+		},
 	}
 }
 
@@ -64,32 +67,6 @@ VALUES($1, $2, $3, $4, $5, $6, $7)
 `
 
 	_, err := tx.tx.Exec(ctx, query, c.ID, c.Code, c.CreatedAt, c.ExpiresAt, c.Stale, c.Used, c.PhoneNumberID)
-
-	return err
-}
-
-func (tx *txImpl) CreateTxobForEmailCode(ctx context.Context, code confirmationV1.EmailAddressConfirmationCode) error {
-	query := `
-INSERT INTO email_address_confirmation_code_txob(
-  code_id, sent
-) 
-VALUES($1, FALSE)
-`
-
-	_, err := tx.tx.Exec(ctx, query, code.Id)
-
-	return err
-}
-
-func (tx *txImpl) CreateTxobForPhoneCode(ctx context.Context, code confirmationV1.PhoneNumberConfirmationCode) error {
-	query := `
-INSERT INTO phone_number_confirmation_code_txob(
-  code_id, sent
-) 
-VALUES($1, FALSE)
-`
-
-	_, err := tx.tx.Exec(ctx, query, code.Id)
 
 	return err
 }

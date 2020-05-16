@@ -4,6 +4,9 @@ import (
 	"context"
 	"time"
 
+	"github.com/AlpacaLabs/api-account-confirmation/internal/db/entities"
+	code "github.com/AlpacaLabs/go-random-code"
+
 	"github.com/AlpacaLabs/api-account-confirmation/internal/db"
 	clock "github.com/AlpacaLabs/go-timestamp"
 	confirmationV1 "github.com/AlpacaLabs/protorepo-confirmation-go/alpacalabs/confirmation/v1"
@@ -24,9 +27,11 @@ func (s Service) CreateEmailAddressConfirmationCode(ctx context.Context, request
 			CreatedAt:      clock.TimeToTimestamp(now),
 			ExpiresAt:      clock.TimeToTimestamp(now.Add(codeLongevity)),
 		}
-		return tx.CreateEmailCode(ctx, c)
+		if err := tx.CreateEmailCode(ctx, c); err != nil {
+			return err
+		}
 
-		// TODO also write TXOB record to hit Hermes
+		return tx.CreateTxobForEmailCode(ctx, entities.NewSendEmailEvent(c.Id))
 	})
 }
 
@@ -40,8 +45,10 @@ func (s Service) CreatePhoneNumberConfirmationCode(ctx context.Context, request 
 			CreatedAt:     clock.TimeToTimestamp(now),
 			ExpiresAt:     clock.TimeToTimestamp(now.Add(codeLongevity)),
 		}
-		return tx.CreatePhoneCode(ctx, c)
+		if err := tx.CreatePhoneCode(ctx, c); err != nil {
+			return err
+		}
 
-		// TODO also write TXOB record to hit Hermes
+		return tx.CreateTxobForPhoneCode(ctx, entities.NewSendPhoneEvent(c.Id))
 	})
 }

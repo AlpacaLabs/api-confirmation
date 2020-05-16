@@ -2,7 +2,6 @@ package async
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/AlpacaLabs/api-account-confirmation/internal/configuration"
 	"github.com/AlpacaLabs/api-account-confirmation/internal/service"
@@ -17,30 +16,11 @@ const (
 )
 
 func HandleCreateEmailAddressCode(config configuration.Config, s service.Service) {
-	handle(TopicForEmailAddressConfirmation, config, handleCreateEmailAddressCode(s))
+	readFromTopic(TopicForEmailAddressConfirmation, config, handleCreateEmailAddressCode(s))
 }
 
 func HandleCreatePhoneNumberCode(config configuration.Config, s service.Service) {
-	handle(TopicForPhoneNumberConfirmation, config, handleCreatePhoneNumberCode(s))
-}
-
-func handle(topic string, config configuration.Config, fn goKafka.ProcessFunc) {
-	ctx := context.TODO()
-
-	groupID := config.AppName
-	brokers := []string{
-		fmt.Sprintf("%s:%d", config.KafkaConfig.Host, config.KafkaConfig.Port),
-	}
-
-	err := goKafka.ProcessKafkaMessages(ctx, goKafka.ProcessKafkaMessagesInput{
-		Brokers:     brokers,
-		GroupID:     groupID,
-		Topic:       topic,
-		ProcessFunc: fn,
-	})
-	if err != nil {
-		log.Errorf("%v", err)
-	}
+	readFromTopic(TopicForPhoneNumberConfirmation, config, handleCreatePhoneNumberCode(s))
 }
 
 func handleCreateEmailAddressCode(s service.Service) goKafka.ProcessFunc {
