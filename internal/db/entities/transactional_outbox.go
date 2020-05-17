@@ -29,3 +29,31 @@ func NewSendPhoneEvent(codeID string) SendPhoneEvent {
 		CodeID:  codeID,
 	}
 }
+
+type ConfirmEmailEvent struct {
+	EventID        string
+	Sent           bool
+	EmailAddressID string
+}
+
+func NewConfirmEmailEvent(emailAddressID string) ConfirmEmailEvent {
+	return ConfirmEmailEvent{
+		EventID:        xid.New().String(),
+		Sent:           false,
+		EmailAddressID: emailAddressID,
+	}
+}
+
+type ConfirmPhoneEvent struct {
+	EventID       string
+	Sent          bool
+	PhoneNumberID string
+}
+
+func NewConfirmPhoneEvent(phoneNumberID string) ConfirmPhoneEvent {
+	return ConfirmPhoneEvent{
+		EventID:       xid.New().String(),
+		Sent:          false,
+		PhoneNumberID: phoneNumberID,
+	}
+}
