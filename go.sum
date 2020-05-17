@@ -12,6 +12,8 @@ github.com/AlpacaLabs/go-timestamp v0.0.0-20200502002453-181df3ead2e7 h1:jPn+r1Q
 github.com/AlpacaLabs/go-timestamp v0.0.0-20200502002453-181df3ead2e7/go.mod h1:h4mXCRm0Ts24vLTEsdIDWTBZrvrtinXL7MrBWdeQkmQ=
 github.com/AlpacaLabs/protorepo-confirmation-go v0.0.0-20200515223429-b7bc28792a75 h1:LMlzIVOhmGHyrUTS97P7h024xvZ0BceXcyjsWpQcnis=
 github.com/AlpacaLabs/protorepo-confirmation-go v0.0.0-20200515223429-b7bc28792a75/go.mod h1:ELTKlG/48hVSyzJbkKrXiSURjYK8sQ3mr1P6vHaNURI=
+github.com/AlpacaLabs/protorepo-event-go v0.0.0-20200517012157-817122666c68 h1:YGHw7PW+cA8Ovm1mNLbzFqtKQRrpZILKWzx5Gw9S/wE=
+github.com/AlpacaLabs/protorepo-event-go v0.0.0-20200517012157-817122666c68/go.mod h1:pfwk4ZcgrqgP4FbUtvI771kwyfTYhhGiSix1qktvw8A=
 github.com/AlpacaLabs/protorepo-hermes-go v0.0.0-20200504021841-28421f772c4d h1:2wiVQaAkbybfE0HO9aZF+GCVKEEjI5/TMIflLAxRVII=
 github.com/AlpacaLabs/protorepo-hermes-go v0.0.0-20200504021841-28421f772c4d/go.mod h1:7mRMd6etEb2iqWmqEn+YtW/l2qzLNyL5jZ7cqwM/zOg=
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=

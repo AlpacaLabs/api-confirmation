@@ -32,7 +32,7 @@ func (s Service) ConfirmEmailAddress(ctx context.Context, request *confirmationV
 		// Write to transactional outbox so a message relay
 		// can mark the email address as confirmed in the
 		// Account Service.
-		return tx.CreateTxobForEmailConfirmation(ctx, entities.NewConfirmEmailEvent(emailAddressID))
+		return tx.CreateTxobForEmailConfirmation(ctx, entities.NewConfirmEmailEvent(ctx, emailAddressID))
 	}); err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (s Service) ConfirmPhoneNumber(ctx context.Context, request *confirmationV1
 		// Write to transactional outbox so a message relay
 		// can mark the phone number as confirmed in the
 		// Account Service.
-		return tx.CreateTxobForPhoneConfirmation(ctx, entities.NewConfirmPhoneEvent(phoneNumberID))
+		return tx.CreateTxobForPhoneConfirmation(ctx, entities.NewConfirmPhoneEvent(ctx, phoneNumberID))
 	}); err != nil {
 		return nil, err
 	}

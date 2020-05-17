@@ -1,58 +1,95 @@
 package entities
 
-import "github.com/rs/xid"
+import (
+	"context"
+
+	eventV1 "github.com/AlpacaLabs/protorepo-event-go/alpacalabs/event/v1"
+	"github.com/rs/xid"
+)
 
 type SendEmailEvent struct {
-	EventID string
-	Sent    bool
-	CodeID  string
+	eventV1.EventInfo
+	eventV1.TraceInfo
+	Sent   bool
+	CodeID string
 }
 
-func NewSendEmailEvent(codeID string) SendEmailEvent {
+func NewSendEmailEvent(ctx context.Context, codeID string) SendEmailEvent {
 	return SendEmailEvent{
-		EventID: xid.New().String(),
-		Sent:    false,
-		CodeID:  codeID,
+		EventInfo: eventV1.EventInfo{
+			EventId: xid.New().String(),
+		},
+		TraceInfo: eventV1.TraceInfo{
+			// TODO get from context
+			TraceId: "",
+			Sampled: false,
+		},
+		Sent:   false,
+		CodeID: codeID,
 	}
 }
 
 type SendPhoneEvent struct {
-	EventID string
-	Sent    bool
-	CodeID  string
+	eventV1.EventInfo
+	eventV1.TraceInfo
+	Sent   bool
+	CodeID string
 }
 
-func NewSendPhoneEvent(codeID string) SendPhoneEvent {
+func NewSendPhoneEvent(ctx context.Context, codeID string) SendPhoneEvent {
 	return SendPhoneEvent{
-		EventID: xid.New().String(),
-		Sent:    false,
-		CodeID:  codeID,
+		EventInfo: eventV1.EventInfo{
+			EventId: xid.New().String(),
+		},
+		TraceInfo: eventV1.TraceInfo{
+			// TODO get from context
+			TraceId: "",
+			Sampled: false,
+		},
+		Sent:   false,
+		CodeID: codeID,
 	}
 }
 
 type ConfirmEmailEvent struct {
-	EventID        string
+	eventV1.EventInfo
+	eventV1.TraceInfo
 	Sent           bool
 	EmailAddressID string
 }
 
-func NewConfirmEmailEvent(emailAddressID string) ConfirmEmailEvent {
+func NewConfirmEmailEvent(ctx context.Context, emailAddressID string) ConfirmEmailEvent {
 	return ConfirmEmailEvent{
-		EventID:        xid.New().String(),
+		EventInfo: eventV1.EventInfo{
+			EventId: xid.New().String(),
+		},
+		TraceInfo: eventV1.TraceInfo{
+			// TODO get from context
+			TraceId: "",
+			Sampled: false,
+		},
 		Sent:           false,
 		EmailAddressID: emailAddressID,
 	}
 }
 
 type ConfirmPhoneEvent struct {
-	EventID       string
+	eventV1.EventInfo
+	eventV1.TraceInfo
 	Sent          bool
 	PhoneNumberID string
 }
 
-func NewConfirmPhoneEvent(phoneNumberID string) ConfirmPhoneEvent {
+func NewConfirmPhoneEvent(ctx context.Context, phoneNumberID string) ConfirmPhoneEvent {
 	return ConfirmPhoneEvent{
-		EventID:       xid.New().String(),
+		EventInfo: eventV1.EventInfo{
+			EventId: xid.New().String(),
+		},
+		TraceInfo: eventV1.TraceInfo{
+			// TODO get from context
+			TraceId: "",
+			Sampled: false,
+		},
 		Sent:          false,
 		PhoneNumberID: phoneNumberID,
 	}
