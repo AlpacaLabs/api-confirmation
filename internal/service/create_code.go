@@ -31,7 +31,7 @@ func (s Service) CreateEmailAddressConfirmationCode(ctx context.Context, request
 			return err
 		}
 
-		return tx.CreateTxobForEmailCode(ctx, entities.NewSendEmailEvent(ctx, c.Id))
+		return tx.CreateEventForSendEmailRequest(ctx, entities.NewSendEmailEvent(ctx, c.Id))
 	})
 }
 
@@ -49,6 +49,6 @@ func (s Service) CreatePhoneNumberConfirmationCode(ctx context.Context, request 
 			return err
 		}
 
-		return tx.CreateTxobForPhoneCode(ctx, entities.NewSendPhoneEvent(ctx, c.Id))
+		return tx.CreateEventForSendSmsRequest(ctx, entities.NewSendPhoneEvent(ctx, c.Id))
 	})
 }

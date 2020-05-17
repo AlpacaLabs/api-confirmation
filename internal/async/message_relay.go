@@ -9,7 +9,6 @@ import (
 
 	"github.com/AlpacaLabs/api-confirmation/internal/configuration"
 	"github.com/AlpacaLabs/api-confirmation/internal/db"
-	"github.com/AlpacaLabs/api-confirmation/internal/db/entities"
 	"github.com/segmentio/kafka-go"
 	log "github.com/sirupsen/logrus"
 )
@@ -21,31 +20,29 @@ func ReadFromTransactionalOutbox(config configuration.Config, dbClient db.Client
 	brokers := []string{
 		fmt.Sprintf("%s:%d", config.KafkaConfig.Host, config.KafkaConfig.Port),
 	}
-	batchSize := 5
 	writer := kafka.NewWriter(kafka.WriterConfig{
-		Brokers:   brokers,
-		Topic:     topic.TopicForSendEmailRequest,
-		BatchSize: batchSize,
+		Brokers: brokers,
+		Topic:   topic.TopicForSendEmailRequest,
 	})
 	defer writer.Close()
+
 	for {
 		ctx := context.TODO()
-		var events []entities.SendEmailEvent
 		if err := dbClient.RunInTransaction(ctx, func(ctx context.Context, tx db.Transaction) error {
-			e, err := tx.ReadFromTxobForEmailCode(ctx, batchSize)
-			events = e
-			return err
+			e, err := tx.ReadEventForSendEmailRequest(ctx)
+			if err != nil {
+				return fmt.Errorf("failed to read event from transactional outbox for sending emails: %w", err)
+			}
+
+			// TODO write protobuf to Hermes topic
+			//writer.WriteMessages(ctx,)
+
+			return tx.MarkAsSentSendEmailRequest(ctx, e.EventId)
 		}); err != nil {
 			log.Errorf("message relay encountered error: %v", err)
 			log.Warnf("sleeping after error...")
 			time.Sleep(time.Second * 2)
 			break
 		}
-
-		log.Debugf("Sending events: %v", events)
-
-		//for _, e := range events {
-		// TODO send to topic
-		//writer.WriteMessages(ctx, )
 	}
 }

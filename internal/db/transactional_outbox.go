@@ -2,188 +2,224 @@ package db
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/AlpacaLabs/api-confirmation/internal/db/entities"
 	"github.com/jackc/pgx/v4"
 )
 
+const (
+	// TableForSendEmailRequest is the name of the transactional outbox (database table)
+	// from which we read "jobs" or "events" that need to get sent to a message broker.
+	TableForSendEmailRequest = "txob_send_email_request"
+	TableForSendSmsRequest   = "txob_send_sms_request"
+
+	TableForConfirmEmailAddressRequest = "txob_confirm_email_address_request"
+	TableForConfirmPhoneNumberRequest  = "txob_confirm_phone_number_request"
+)
+
+// TODO this could probably all be DRYer by using 1 table and storing protobuf byte arrays in a column
+
 type TransactionalOutbox interface {
-	CreateTxobForEmailCode(ctx context.Context, e entities.SendEmailEvent) error
-	CreateTxobForPhoneCode(ctx context.Context, e entities.SendPhoneEvent) error
-	ReadFromTxobForEmailCode(ctx context.Context, num int) ([]entities.SendEmailEvent, error)
-	ReadFromTxobForPhoneCode(ctx context.Context, num int) ([]entities.SendPhoneEvent, error)
+	ReadEventForSendEmailRequest(ctx context.Context) (*entities.SendEmailEvent, error)
+	ReadEventForSendSmsRequest(ctx context.Context) (*entities.SendPhoneEvent, error)
+	CreateEventForSendEmailRequest(ctx context.Context, e entities.SendEmailEvent) error
+	CreateEventForSendSmsRequest(ctx context.Context, e entities.SendPhoneEvent) error
+	MarkAsSentSendEmailRequest(ctx context.Context, eventID string) error
+	MarkAsSentSendSmsRequest(ctx context.Context, eventID string) error
 
-	CreateTxobForEmailConfirmation(ctx context.Context, e entities.ConfirmEmailEvent) error
-	ReadFromTxobForEmailConfirmation(ctx context.Context, num int) ([]entities.ConfirmEmailEvent, error)
-
-	CreateTxobForPhoneConfirmation(ctx context.Context, e entities.ConfirmPhoneEvent) error
-	ReadFromTxobForPhoneConfirmation(ctx context.Context, num int) ([]entities.ConfirmPhoneEvent, error)
+	ReadEventForEmailConfirmation(ctx context.Context) (*entities.ConfirmEmailEvent, error)
+	ReadEventForPhoneConfirmation(ctx context.Context) (*entities.ConfirmPhoneEvent, error)
+	CreateEventForEmailConfirmation(ctx context.Context, e entities.ConfirmEmailEvent) error
+	CreateEventForPhoneConfirmation(ctx context.Context, e entities.ConfirmPhoneEvent) error
+	MarkAsSentConfirmEmailEvent(ctx context.Context, eventID string) error
+	MarkAsSentConfirmPhoneEvent(ctx context.Context, eventID string) error
 }
 
 type outboxImpl struct {
 	tx pgx.Tx
 }
 
-func (tx *outboxImpl) CreateTxobForEmailCode(ctx context.Context, e entities.SendEmailEvent) error {
-	query := `
-INSERT INTO email_address_confirmation_code_txob(
+func (tx *outboxImpl) ReadEventForSendEmailRequest(ctx context.Context) (*entities.SendEmailEvent, error) {
+	queryTemplate := `
+SELECT event_id, trace_id, sampled, code_id
+  FROM %s
+  WHERE sent = FALSE
+  LIMIT 1
+`
+
+	query := fmt.Sprintf(queryTemplate, TableForSendEmailRequest)
+
+	row := tx.tx.QueryRow(ctx, query)
+
+	var e entities.SendEmailEvent
+	if err := row.Scan(&e.EventId, &e.TraceId, &e.Sampled, &e.CodeID); err != nil {
+		return nil, err
+	}
+
+	return &e, nil
+}
+
+func (tx *outboxImpl) ReadEventForSendSmsRequest(ctx context.Context) (*entities.SendPhoneEvent, error) {
+	queryTemplate := `
+SELECT event_id, trace_id, sampled, code_id
+  FROM %s
+  WHERE sent = FALSE
+  LIMIT 1
+`
+
+	query := fmt.Sprintf(queryTemplate, TableForSendSmsRequest)
+
+	row := tx.tx.QueryRow(ctx, query)
+
+	var e entities.SendPhoneEvent
+
+	if err := row.Scan(&e.EventId, &e.TraceId, &e.Sampled, &e.CodeID); err != nil {
+		return nil, err
+	}
+
+	return &e, nil
+}
+
+func (tx *outboxImpl) CreateEventForSendEmailRequest(ctx context.Context, e entities.SendEmailEvent) error {
+	queryTemplate := `
+INSERT INTO %s(
   event_id, trace_id, sampled, sent, code_id
 ) 
 VALUES($1, $2, $3, FALSE, $4)
 `
+
+	query := fmt.Sprintf(queryTemplate, TableForSendEmailRequest)
 
 	_, err := tx.tx.Exec(ctx, query, e.EventId, e.TraceId, e.Sampled, e.CodeID)
 
 	return err
 }
 
-func (tx *outboxImpl) CreateTxobForPhoneCode(ctx context.Context, e entities.SendPhoneEvent) error {
-	query := `
-INSERT INTO phone_number_confirmation_code_txob(
+func (tx *outboxImpl) CreateEventForSendSmsRequest(ctx context.Context, e entities.SendPhoneEvent) error {
+	queryTemplate := `
+INSERT INTO %s(
   event_id, trace_id, sampled, sent, code_id
 ) 
 VALUES($1, $2, $3, FALSE, $4)
 `
+
+	query := fmt.Sprintf(queryTemplate, TableForSendSmsRequest)
 
 	_, err := tx.tx.Exec(ctx, query, e.EventId, e.TraceId, e.Sampled, e.CodeID)
 
 	return err
 }
 
-func (tx *outboxImpl) ReadFromTxobForEmailCode(ctx context.Context, num int) ([]entities.SendEmailEvent, error) {
-	query := `
-SELECT event_id, trace_id, sampled, code_id
-  FROM email_address_confirmation_code_txob
-  WHERE sent = FALSE
-  LIMIT $1
+func (tx *outboxImpl) MarkAsSentSendEmailRequest(ctx context.Context, eventID string) error {
+	queryTemplate := `
+UPDATE %s
+  SET sent = TRUE
+  WHERE event_id = $1
 `
-	rows, err := tx.tx.Query(ctx, query, num)
-
-	if err != nil {
-		return nil, err
-	}
-
-	defer rows.Close()
-
-	events := []entities.SendEmailEvent{}
-
-	for rows.Next() {
-		var e entities.SendEmailEvent
-		if err := rows.Scan(&e.EventId, &e.TraceId, &e.Sampled, &e.CodeID); err != nil {
-			return nil, err
-		}
-		events = append(events, e)
-	}
-
-	return events, nil
+	query := fmt.Sprintf(queryTemplate, TableForSendEmailRequest)
+	_, err := tx.tx.Exec(ctx, query, eventID)
+	return err
 }
 
-func (tx *outboxImpl) ReadFromTxobForPhoneCode(ctx context.Context, num int) ([]entities.SendPhoneEvent, error) {
-	query := `
-SELECT event_id, trace_id, sampled, code_id
-  FROM email_address_confirmation_code_txob
-  WHERE sent = FALSE
-  LIMIT $1
+func (tx *outboxImpl) MarkAsSentSendSmsRequest(ctx context.Context, eventID string) error {
+	queryTemplate := `
+UPDATE %s
+  SET sent = TRUE
+  WHERE event_id = $1
 `
-	rows, err := tx.tx.Query(ctx, query, num)
-
-	if err != nil {
-		return nil, err
-	}
-
-	defer rows.Close()
-
-	events := []entities.SendPhoneEvent{}
-
-	for rows.Next() {
-		var e entities.SendPhoneEvent
-		if err := rows.Scan(&e.EventId, &e.TraceId, &e.Sampled, &e.CodeID); err != nil {
-			return nil, err
-		}
-		events = append(events, e)
-	}
-
-	return events, nil
+	query := fmt.Sprintf(queryTemplate, TableForSendSmsRequest)
+	_, err := tx.tx.Exec(ctx, query, eventID)
+	return err
 }
 
-func (tx *outboxImpl) ReadFromTxobForPhoneConfirmation(ctx context.Context, num int) ([]entities.ConfirmPhoneEvent, error) {
-	query := `
-SELECT event_id, trace_id, sampled, phone_number_id
-  FROM phone_number_confirmation_txob
-  WHERE sent = FALSE
-  LIMIT $1
-`
-	rows, err := tx.tx.Query(ctx, query, num)
-
-	if err != nil {
-		return nil, err
-	}
-
-	defer rows.Close()
-
-	events := []entities.ConfirmPhoneEvent{}
-
-	for rows.Next() {
-		var e entities.ConfirmPhoneEvent
-		if err := rows.Scan(&e.EventId, &e.TraceId, &e.Sampled, &e.PhoneNumberID); err != nil {
-			return nil, err
-		}
-		events = append(events, e)
-	}
-
-	return events, nil
-}
-
-func (tx *outboxImpl) ReadFromTxobForEmailConfirmation(ctx context.Context, num int) ([]entities.ConfirmEmailEvent, error) {
-	query := `
+func (tx *outboxImpl) ReadEventForEmailConfirmation(ctx context.Context) (*entities.ConfirmEmailEvent, error) {
+	queryTemplate := `
 SELECT event_id, trace_id, sampled, email_address_id
-  FROM email_address_confirmation_txob
+  FROM %s
   WHERE sent = FALSE
-  LIMIT $1
+  LIMIT 1
 `
-	rows, err := tx.tx.Query(ctx, query, num)
+	query := fmt.Sprintf(queryTemplate, TableForConfirmEmailAddressRequest)
 
-	if err != nil {
+	row := tx.tx.QueryRow(ctx, query)
+
+	var e entities.ConfirmEmailEvent
+	if err := row.Scan(&e.EventId, &e.TraceId, &e.Sampled, &e.EmailAddressID); err != nil {
 		return nil, err
 	}
 
-	defer rows.Close()
-
-	events := []entities.ConfirmEmailEvent{}
-
-	for rows.Next() {
-		var e entities.ConfirmEmailEvent
-		if err := rows.Scan(&e.EventId, &e.TraceId, &e.Sampled, &e.EmailAddressID); err != nil {
-			return nil, err
-		}
-		events = append(events, e)
-	}
-
-	return events, nil
+	return &e, nil
 }
 
-func (tx *outboxImpl) CreateTxobForEmailConfirmation(ctx context.Context, e entities.ConfirmEmailEvent) error {
-	query := `
-INSERT INTO email_address_confirmation_txob(
+func (tx *outboxImpl) ReadEventForPhoneConfirmation(ctx context.Context) (*entities.ConfirmPhoneEvent, error) {
+	queryTemplate := `
+SELECT event_id, trace_id, sampled, phone_number_id
+  FROM %s
+  WHERE sent = FALSE
+  LIMIT 1
+`
+
+	query := fmt.Sprintf(queryTemplate, TableForConfirmPhoneNumberRequest)
+
+	row := tx.tx.QueryRow(ctx, query)
+
+	var e entities.ConfirmPhoneEvent
+	if err := row.Scan(&e.EventId, &e.TraceId, &e.Sampled, &e.PhoneNumberID); err != nil {
+		return nil, err
+	}
+
+	return &e, nil
+}
+
+func (tx *outboxImpl) CreateEventForEmailConfirmation(ctx context.Context, e entities.ConfirmEmailEvent) error {
+	queryTemplate := `
+INSERT INTO %s(
   event_id, trace_id, sampled, sent, email_address_id
 ) 
 VALUES($1, $2, $3, FALSE, $4)
 `
+
+	query := fmt.Sprintf(queryTemplate, TableForConfirmEmailAddressRequest)
 
 	_, err := tx.tx.Exec(ctx, query, e.EventId, e.TraceId, e.Sampled, e.EmailAddressID)
 
 	return err
 }
 
-func (tx *outboxImpl) CreateTxobForPhoneConfirmation(ctx context.Context, e entities.ConfirmPhoneEvent) error {
-	query := `
-INSERT INTO phone_number_confirmation_txob(
+func (tx *outboxImpl) CreateEventForPhoneConfirmation(ctx context.Context, e entities.ConfirmPhoneEvent) error {
+	queryTemplate := `
+INSERT INTO %s(
   event_id, trace_id, sampled, sent, phone_number_id
 ) 
 VALUES($1, $2, $3, FALSE, $4)
 `
 
+	query := fmt.Sprintf(queryTemplate, TableForConfirmPhoneNumberRequest)
+
 	_, err := tx.tx.Exec(ctx, query, e.EventId, e.TraceId, e.Sampled, e.PhoneNumberID)
 
+	return err
+}
+
+func (tx *outboxImpl) MarkAsSentConfirmEmailEvent(ctx context.Context, eventID string) error {
+	queryTemplate := `
+UPDATE %s
+  SET sent = TRUE
+  WHERE event_id = $1
+`
+	query := fmt.Sprintf(queryTemplate, TableForConfirmEmailAddressRequest)
+	_, err := tx.tx.Exec(ctx, query, eventID)
+	return err
+}
+
+func (tx *outboxImpl) MarkAsSentConfirmPhoneEvent(ctx context.Context, eventID string) error {
+	queryTemplate := `
+UPDATE %s
+  SET sent = TRUE
+  WHERE event_id = $1
+`
+	query := fmt.Sprintf(queryTemplate, TableForConfirmPhoneNumberRequest)
+	_, err := tx.tx.Exec(ctx, query, eventID)
 	return err
 }
