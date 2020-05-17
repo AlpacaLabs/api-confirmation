@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/AlpacaLabs/api-hermes/pkg/topic"
+
 	"github.com/AlpacaLabs/api-account-confirmation/internal/configuration"
 	"github.com/AlpacaLabs/api-account-confirmation/internal/db"
 	"github.com/AlpacaLabs/api-account-confirmation/internal/db/entities"
@@ -15,15 +17,6 @@ import (
 // As described in the docs: https://microservices.io/patterns/data/transactional-outbox.html
 // "A separate Message Relay process publishes the events inserted into database to a message broker."
 
-const (
-	// TODO import these from AlpacaLabs/hermes/pkg
-	TopicForSendEmailRequest = "send-email-request"
-	TopicForSendSmsRequest   = "send-sms-request"
-)
-
-//  TODO to prevent duplicate messages from being sent, the message relay
-//   should be deployed as a separate process and should not have any replicas.
-
 func ReadFromTransactionalOutbox(config configuration.Config, dbClient db.Client) {
 	brokers := []string{
 		fmt.Sprintf("%s:%d", config.KafkaConfig.Host, config.KafkaConfig.Port),
@@ -31,7 +24,7 @@ func ReadFromTransactionalOutbox(config configuration.Config, dbClient db.Client
 	batchSize := 5
 	writer := kafka.NewWriter(kafka.WriterConfig{
 		Brokers:   brokers,
-		Topic:     TopicForSendEmailRequest,
+		Topic:     topic.TopicForSendEmailRequest,
 		BatchSize: batchSize,
 	})
 	defer writer.Close()

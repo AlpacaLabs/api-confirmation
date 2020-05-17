@@ -3,6 +3,7 @@ module github.com/AlpacaLabs/api-account-confirmation
 go 1.14
 
 require (
+	github.com/AlpacaLabs/api-hermes v0.0.0-20200517003014-3924fbed4b60
 	github.com/AlpacaLabs/go-config v0.0.0-20200513234945-e6f2b4c2c8d6
 	github.com/AlpacaLabs/go-kafka v0.0.0-20200513011912-5ecc9cc5b6ba
 	github.com/AlpacaLabs/go-random-code v0.0.0-20200505155937-a738e97db13f
