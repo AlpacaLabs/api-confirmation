@@ -7,9 +7,9 @@ import (
 
 	"github.com/AlpacaLabs/api-hermes/pkg/topic"
 
-	"github.com/AlpacaLabs/api-account-confirmation/internal/configuration"
-	"github.com/AlpacaLabs/api-account-confirmation/internal/db"
-	"github.com/AlpacaLabs/api-account-confirmation/internal/db/entities"
+	"github.com/AlpacaLabs/api-confirmation/internal/configuration"
+	"github.com/AlpacaLabs/api-confirmation/internal/db"
+	"github.com/AlpacaLabs/api-confirmation/internal/db/entities"
 	"github.com/segmentio/kafka-go"
 	log "github.com/sirupsen/logrus"
 )

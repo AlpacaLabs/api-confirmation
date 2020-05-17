@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/AlpacaLabs/api-account-confirmation/internal/db/entities"
+	"github.com/AlpacaLabs/api-confirmation/internal/db/entities"
 	code "github.com/AlpacaLabs/go-random-code"
 
-	"github.com/AlpacaLabs/api-account-confirmation/internal/db"
+	"github.com/AlpacaLabs/api-confirmation/internal/db"
 	clock "github.com/AlpacaLabs/go-timestamp"
 	confirmationV1 "github.com/AlpacaLabs/protorepo-confirmation-go/alpacalabs/confirmation/v1"
 	"github.com/rs/xid"

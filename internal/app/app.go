@@ -3,14 +3,14 @@ package app
 import (
 	"sync"
 
-	"github.com/AlpacaLabs/api-account-confirmation/internal/async"
+	"github.com/AlpacaLabs/api-confirmation/internal/async"
 
-	"github.com/AlpacaLabs/api-account-confirmation/internal/grpc"
+	"github.com/AlpacaLabs/api-confirmation/internal/grpc"
 
-	"github.com/AlpacaLabs/api-account-confirmation/internal/configuration"
-	"github.com/AlpacaLabs/api-account-confirmation/internal/db"
-	"github.com/AlpacaLabs/api-account-confirmation/internal/http"
-	"github.com/AlpacaLabs/api-account-confirmation/internal/service"
+	"github.com/AlpacaLabs/api-confirmation/internal/configuration"
+	"github.com/AlpacaLabs/api-confirmation/internal/db"
+	"github.com/AlpacaLabs/api-confirmation/internal/http"
+	"github.com/AlpacaLabs/api-confirmation/internal/service"
 	log "github.com/sirupsen/logrus"
 )
 

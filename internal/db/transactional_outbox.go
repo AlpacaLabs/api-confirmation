@@ -3,7 +3,7 @@ package db
 import (
 	"context"
 
-	"github.com/AlpacaLabs/api-account-confirmation/internal/db/entities"
+	"github.com/AlpacaLabs/api-confirmation/internal/db/entities"
 	"github.com/jackc/pgx/v4"
 )
 

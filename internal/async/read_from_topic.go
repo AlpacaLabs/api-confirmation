@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/AlpacaLabs/api-account-confirmation/internal/configuration"
+	"github.com/AlpacaLabs/api-confirmation/internal/configuration"
 	goKafka "github.com/AlpacaLabs/go-kafka"
 	log "github.com/sirupsen/logrus"
 )

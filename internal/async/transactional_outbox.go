@@ -3,8 +3,8 @@ package async
 import (
 	"context"
 
-	"github.com/AlpacaLabs/api-account-confirmation/internal/configuration"
-	"github.com/AlpacaLabs/api-account-confirmation/internal/service"
+	"github.com/AlpacaLabs/api-confirmation/internal/configuration"
+	"github.com/AlpacaLabs/api-confirmation/internal/service"
 	goKafka "github.com/AlpacaLabs/go-kafka"
 	confirmationV1 "github.com/AlpacaLabs/protorepo-confirmation-go/alpacalabs/confirmation/v1"
 	log "github.com/sirupsen/logrus"

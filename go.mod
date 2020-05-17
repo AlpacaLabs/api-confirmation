@@ -1,4 +1,4 @@
-module github.com/AlpacaLabs/api-account-confirmation
+module github.com/AlpacaLabs/api-confirmation
 
 go 1.14
 
