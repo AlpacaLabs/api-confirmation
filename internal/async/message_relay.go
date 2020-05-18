@@ -48,7 +48,7 @@ func ReadFromTransactionalOutbox(config configuration.Config, dbClient db.Client
 			//emailCode.EmailAddressId
 
 			pb := &hermesV1.SendEmailRequest{
-				// TODO
+				// TODO build actual email body to let them know they should confirm their account
 				Email: &hermesV1.Email{
 					Subject: "Email Confirmation",
 					Body: &hermesV1.Body{
