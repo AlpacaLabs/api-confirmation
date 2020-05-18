@@ -62,7 +62,7 @@ func (a App) Run() {
 	go async.HandleCreatePhoneNumberCode(a.config, svc)
 
 	wg.Add(1)
-	go async.ReadFromTransactionalOutbox(a.config, dbClient, accountConn)
+	go async.RelayMessagesToHermes(a.config, dbClient, accountConn)
 
 	wg.Wait()
 }
