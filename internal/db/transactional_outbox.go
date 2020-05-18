@@ -18,18 +18,16 @@ const (
 	TableForConfirmPhoneNumberRequest  = "txob_confirm_phone_number_request"
 )
 
-// TODO this could probably all be DRYer by using 1 table and storing protobuf byte arrays in a column
-
 type TransactionalOutbox interface {
-	ReadEventForSendEmailRequest(ctx context.Context) (*entities.SendEmailEvent, error)
-	ReadEventForSendSmsRequest(ctx context.Context) (*entities.SendPhoneEvent, error)
+	ReadEventForSendEmailRequest(ctx context.Context) (e entities.SendEmailEvent, err error)
+	ReadEventForSendSmsRequest(ctx context.Context) (e entities.SendPhoneEvent, err error)
 	CreateEventForSendEmailRequest(ctx context.Context, e entities.SendEmailEvent) error
 	CreateEventForSendSmsRequest(ctx context.Context, e entities.SendPhoneEvent) error
 	MarkAsSentSendEmailRequest(ctx context.Context, eventID string) error
 	MarkAsSentSendSmsRequest(ctx context.Context, eventID string) error
 
-	ReadEventForEmailConfirmation(ctx context.Context) (*entities.ConfirmEmailEvent, error)
-	ReadEventForPhoneConfirmation(ctx context.Context) (*entities.ConfirmPhoneEvent, error)
+	ReadEventForEmailConfirmation(ctx context.Context) (e entities.ConfirmEmailEvent, err error)
+	ReadEventForPhoneConfirmation(ctx context.Context) (e entities.ConfirmPhoneEvent, err error)
 	CreateEventForEmailConfirmation(ctx context.Context, e entities.ConfirmEmailEvent) error
 	CreateEventForPhoneConfirmation(ctx context.Context, e entities.ConfirmPhoneEvent) error
 	MarkAsSentConfirmEmailEvent(ctx context.Context, eventID string) error
@@ -40,7 +38,7 @@ type outboxImpl struct {
 	tx pgx.Tx
 }
 
-func (tx *outboxImpl) ReadEventForSendEmailRequest(ctx context.Context) (*entities.SendEmailEvent, error) {
+func (tx *outboxImpl) ReadEventForSendEmailRequest(ctx context.Context) (e entities.SendEmailEvent, err error) {
 	queryTemplate := `
 SELECT event_id, trace_id, sampled, code_id
   FROM %s
@@ -52,15 +50,14 @@ SELECT event_id, trace_id, sampled, code_id
 
 	row := tx.tx.QueryRow(ctx, query)
 
-	var e entities.SendEmailEvent
 	if err := row.Scan(&e.EventId, &e.TraceId, &e.Sampled, &e.CodeID); err != nil {
-		return nil, err
+		return e, err
 	}
 
-	return &e, nil
+	return e, nil
 }
 
-func (tx *outboxImpl) ReadEventForSendSmsRequest(ctx context.Context) (*entities.SendPhoneEvent, error) {
+func (tx *outboxImpl) ReadEventForSendSmsRequest(ctx context.Context) (e entities.SendPhoneEvent, err error) {
 	queryTemplate := `
 SELECT event_id, trace_id, sampled, code_id
   FROM %s
@@ -72,13 +69,11 @@ SELECT event_id, trace_id, sampled, code_id
 
 	row := tx.tx.QueryRow(ctx, query)
 
-	var e entities.SendPhoneEvent
-
 	if err := row.Scan(&e.EventId, &e.TraceId, &e.Sampled, &e.CodeID); err != nil {
-		return nil, err
+		return e, err
 	}
 
-	return &e, nil
+	return e, nil
 }
 
 func (tx *outboxImpl) CreateEventForSendEmailRequest(ctx context.Context, e entities.SendEmailEvent) error {
@@ -133,7 +128,7 @@ UPDATE %s
 	return err
 }
 
-func (tx *outboxImpl) ReadEventForEmailConfirmation(ctx context.Context) (*entities.ConfirmEmailEvent, error) {
+func (tx *outboxImpl) ReadEventForEmailConfirmation(ctx context.Context) (e entities.ConfirmEmailEvent, err error) {
 	queryTemplate := `
 SELECT event_id, trace_id, sampled, email_address_id
   FROM %s
@@ -144,15 +139,14 @@ SELECT event_id, trace_id, sampled, email_address_id
 
 	row := tx.tx.QueryRow(ctx, query)
 
-	var e entities.ConfirmEmailEvent
 	if err := row.Scan(&e.EventId, &e.TraceId, &e.Sampled, &e.EmailAddressID); err != nil {
-		return nil, err
+		return e, err
 	}
 
-	return &e, nil
+	return e, nil
 }
 
-func (tx *outboxImpl) ReadEventForPhoneConfirmation(ctx context.Context) (*entities.ConfirmPhoneEvent, error) {
+func (tx *outboxImpl) ReadEventForPhoneConfirmation(ctx context.Context) (e entities.ConfirmPhoneEvent, err error) {
 	queryTemplate := `
 SELECT event_id, trace_id, sampled, phone_number_id
   FROM %s
@@ -164,12 +158,11 @@ SELECT event_id, trace_id, sampled, phone_number_id
 
 	row := tx.tx.QueryRow(ctx, query)
 
-	var e entities.ConfirmPhoneEvent
 	if err := row.Scan(&e.EventId, &e.TraceId, &e.Sampled, &e.PhoneNumberID); err != nil {
-		return nil, err
+		return e, err
 	}
 
-	return &e, nil
+	return e, err
 }
 
 func (tx *outboxImpl) CreateEventForEmailConfirmation(ctx context.Context, e entities.ConfirmEmailEvent) error {
