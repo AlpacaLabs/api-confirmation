@@ -6,6 +6,7 @@ require (
 	github.com/AlpacaLabs/api-hermes v0.0.0-20200517003014-3924fbed4b60
 	github.com/AlpacaLabs/go-config v0.0.0-20200513234945-e6f2b4c2c8d6
 	github.com/AlpacaLabs/go-kafka v0.0.0-20200517194033-e1a05d696765
+	github.com/AlpacaLabs/go-kontext v0.0.0-20200518013238-71415ba69a0e
 	github.com/AlpacaLabs/go-random-code v0.0.0-20200505155937-a738e97db13f
 	github.com/AlpacaLabs/go-timestamp v0.0.0-20200502002453-181df3ead2e7
 	github.com/AlpacaLabs/protorepo-confirmation-go v0.0.0-20200515223429-b7bc28792a75

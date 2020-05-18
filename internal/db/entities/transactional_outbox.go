@@ -3,6 +3,8 @@ package entities
 import (
 	"context"
 
+	"github.com/AlpacaLabs/go-kontext"
+
 	eventV1 "github.com/AlpacaLabs/protorepo-event-go/alpacalabs/event/v1"
 	"github.com/rs/xid"
 )
@@ -20,8 +22,7 @@ func NewSendEmailEvent(ctx context.Context, codeID string) SendEmailEvent {
 			EventId: xid.New().String(),
 		},
 		TraceInfo: eventV1.TraceInfo{
-			// TODO get from context
-			TraceId: "",
+			TraceId: kontext.GetTraceID(ctx),
 			Sampled: false,
 		},
 		Sent:   false,
@@ -42,8 +43,7 @@ func NewSendPhoneEvent(ctx context.Context, codeID string) SendPhoneEvent {
 			EventId: xid.New().String(),
 		},
 		TraceInfo: eventV1.TraceInfo{
-			// TODO get from context
-			TraceId: "",
+			TraceId: kontext.GetTraceID(ctx),
 			Sampled: false,
 		},
 		Sent:   false,
@@ -64,8 +64,7 @@ func NewConfirmEmailEvent(ctx context.Context, emailAddressID string) ConfirmEma
 			EventId: xid.New().String(),
 		},
 		TraceInfo: eventV1.TraceInfo{
-			// TODO get from context
-			TraceId: "",
+			TraceId: kontext.GetTraceID(ctx),
 			Sampled: false,
 		},
 		Sent:           false,
@@ -86,8 +85,7 @@ func NewConfirmPhoneEvent(ctx context.Context, phoneNumberID string) ConfirmPhon
 			EventId: xid.New().String(),
 		},
 		TraceInfo: eventV1.TraceInfo{
-			// TODO get from context
-			TraceId: "",
+			TraceId: kontext.GetTraceID(ctx),
 			Sampled: false,
 		},
 		Sent:          false,
