@@ -29,13 +29,26 @@ func handleCreateEmailAddressCode(s service.Service) goKafka.ProcessFunc {
 		pb := &confirmationV1.CreateEmailAddressConfirmationCodeRequest{}
 		if err := message.Unmarshal(pb); err != nil {
 			log.Errorf("failed to unmarshal protobuf from kafka message: %v", err)
+			return
 		}
 
-		// TODO we could skip Kafka messages we've seen before by checking if
-		//  the message's EventID exists in the TXOB table.
+		eventInfo, err := message.GetEventInfo()
+		if err != nil {
+			log.Errorf("failed to get event info: %v", err)
+			return
+		}
 
-		if err := s.CreateEmailAddressConfirmationCode(ctx, pb); err != nil {
+		log.Infof("processing event '%s'", eventInfo.EventId)
+
+		traceInfo, err := message.GetTraceInfo()
+		if err != nil {
+			log.Errorf("failed to get trace info: %v", err)
+			return
+		}
+
+		if err := s.CreateEmailAddressConfirmationCode(ctx, traceInfo, pb); err != nil {
 			log.Errorf("failed to process kafka message in transaction: %v", err)
+			return
 		}
 	}
 }
@@ -46,13 +59,26 @@ func handleCreatePhoneNumberCode(s service.Service) goKafka.ProcessFunc {
 		pb := &confirmationV1.CreatePhoneNumberConfirmationCodeRequest{}
 		if err := message.Unmarshal(pb); err != nil {
 			log.Errorf("failed to unmarshal protobuf from kafka message: %v", err)
+			return
 		}
 
-		// TODO we could skip Kafka messages we've seen before by checking if
-		//  the message's EventID exists in the TXOB table.
+		eventInfo, err := message.GetEventInfo()
+		if err != nil {
+			log.Errorf("failed to get event info: %v", err)
+			return
+		}
 
-		if err := s.CreatePhoneNumberConfirmationCode(ctx, pb); err != nil {
+		log.Infof("processing event '%s'", eventInfo.EventId)
+
+		traceInfo, err := message.GetTraceInfo()
+		if err != nil {
+			log.Errorf("failed to get trace info: %v", err)
+			return
+		}
+
+		if err := s.CreatePhoneNumberConfirmationCode(ctx, traceInfo, pb); err != nil {
 			log.Errorf("failed to process kafka message in transaction: %v", err)
+			return
 		}
 	}
 }

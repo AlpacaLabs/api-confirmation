@@ -16,17 +16,14 @@ type SendEmailEvent struct {
 	CodeID string
 }
 
-func NewSendEmailEvent(ctx context.Context, codeID string) SendEmailEvent {
+func NewSendEmailEvent(traceInfo eventV1.TraceInfo, codeID string) SendEmailEvent {
 	return SendEmailEvent{
 		EventInfo: eventV1.EventInfo{
 			EventId: xid.New().String(),
 		},
-		TraceInfo: eventV1.TraceInfo{
-			TraceId: kontext.GetTraceID(ctx),
-			Sampled: false,
-		},
-		Sent:   false,
-		CodeID: codeID,
+		TraceInfo: traceInfo,
+		Sent:      false,
+		CodeID:    codeID,
 	}
 }
 
@@ -37,17 +34,14 @@ type SendPhoneEvent struct {
 	CodeID string
 }
 
-func NewSendPhoneEvent(ctx context.Context, codeID string) SendPhoneEvent {
+func NewSendPhoneEvent(traceInfo eventV1.TraceInfo, codeID string) SendPhoneEvent {
 	return SendPhoneEvent{
 		EventInfo: eventV1.EventInfo{
 			EventId: xid.New().String(),
 		},
-		TraceInfo: eventV1.TraceInfo{
-			TraceId: kontext.GetTraceID(ctx),
-			Sampled: false,
-		},
-		Sent:   false,
-		CodeID: codeID,
+		TraceInfo: traceInfo,
+		Sent:      false,
+		CodeID:    codeID,
 	}
 }
 
@@ -59,14 +53,12 @@ type ConfirmEmailEvent struct {
 }
 
 func NewConfirmEmailEvent(ctx context.Context, emailAddressID string) ConfirmEmailEvent {
+	traceInfo := kontext.GetTraceInfo(ctx)
 	return ConfirmEmailEvent{
 		EventInfo: eventV1.EventInfo{
 			EventId: xid.New().String(),
 		},
-		TraceInfo: eventV1.TraceInfo{
-			TraceId: kontext.GetTraceID(ctx),
-			Sampled: false,
-		},
+		TraceInfo:      traceInfo,
 		Sent:           false,
 		EmailAddressID: emailAddressID,
 	}
@@ -80,14 +72,12 @@ type ConfirmPhoneEvent struct {
 }
 
 func NewConfirmPhoneEvent(ctx context.Context, phoneNumberID string) ConfirmPhoneEvent {
+	traceInfo := kontext.GetTraceInfo(ctx)
 	return ConfirmPhoneEvent{
 		EventInfo: eventV1.EventInfo{
 			EventId: xid.New().String(),
 		},
-		TraceInfo: eventV1.TraceInfo{
-			TraceId: kontext.GetTraceID(ctx),
-			Sampled: false,
-		},
+		TraceInfo:     traceInfo,
 		Sent:          false,
 		PhoneNumberID: phoneNumberID,
 	}

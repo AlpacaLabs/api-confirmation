@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	eventV1 "github.com/AlpacaLabs/protorepo-event-go/alpacalabs/event/v1"
+
 	"github.com/AlpacaLabs/api-confirmation/internal/db/entities"
 	code "github.com/AlpacaLabs/go-random-code"
 
@@ -17,7 +19,7 @@ const (
 	codeLongevity = time.Hour * 24
 )
 
-func (s Service) CreateEmailAddressConfirmationCode(ctx context.Context, request *confirmationV1.CreateEmailAddressConfirmationCodeRequest) error {
+func (s Service) CreateEmailAddressConfirmationCode(ctx context.Context, traceInfo eventV1.TraceInfo, request *confirmationV1.CreateEmailAddressConfirmationCodeRequest) error {
 	return s.dbClient.RunInTransaction(ctx, func(ctx context.Context, tx db.Transaction) error {
 		now := time.Now()
 		c := confirmationV1.EmailAddressConfirmationCode{
@@ -31,11 +33,11 @@ func (s Service) CreateEmailAddressConfirmationCode(ctx context.Context, request
 			return err
 		}
 
-		return tx.CreateEventForSendEmailRequest(ctx, entities.NewSendEmailEvent(ctx, c.Id))
+		return tx.CreateEventForSendEmailRequest(ctx, entities.NewSendEmailEvent(traceInfo, c.Id))
 	})
 }
 
-func (s Service) CreatePhoneNumberConfirmationCode(ctx context.Context, request *confirmationV1.CreatePhoneNumberConfirmationCodeRequest) error {
+func (s Service) CreatePhoneNumberConfirmationCode(ctx context.Context, traceInfo eventV1.TraceInfo, request *confirmationV1.CreatePhoneNumberConfirmationCodeRequest) error {
 	return s.dbClient.RunInTransaction(ctx, func(ctx context.Context, tx db.Transaction) error {
 		now := time.Now()
 		c := confirmationV1.PhoneNumberConfirmationCode{
@@ -49,6 +51,6 @@ func (s Service) CreatePhoneNumberConfirmationCode(ctx context.Context, request 
 			return err
 		}
 
-		return tx.CreateEventForSendSmsRequest(ctx, entities.NewSendPhoneEvent(ctx, c.Id))
+		return tx.CreateEventForSendSmsRequest(ctx, entities.NewSendPhoneEvent(traceInfo, c.Id))
 	})
 }
