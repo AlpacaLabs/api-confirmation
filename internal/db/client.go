@@ -12,8 +12,10 @@ type TxOption string
 
 const ReadOnly = TxOption("read-only")
 
+type TransactionFunc func(context.Context, Transaction) error
+
 type Client interface {
-	RunInTransaction(ctx context.Context, fn func(context.Context, Transaction) error, options ...TxOption) error
+	RunInTransaction(ctx context.Context, fn TransactionFunc, options ...TxOption) error
 }
 
 type clientImpl struct {
@@ -24,7 +26,7 @@ func NewClient(db *pgx.Conn) Client {
 	return &clientImpl{db: db}
 }
 
-func (c *clientImpl) RunInTransaction(ctx context.Context, fn func(context.Context, Transaction) error, options ...TxOption) error {
+func (c *clientImpl) RunInTransaction(ctx context.Context, fn TransactionFunc, options ...TxOption) error {
 	var readOnly bool
 	for _, o := range options {
 		if o == ReadOnly {

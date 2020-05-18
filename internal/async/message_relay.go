@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"time"
 
+	"google.golang.org/grpc"
+
 	hermesTopics "github.com/AlpacaLabs/api-hermes/pkg/topic"
 
 	"github.com/AlpacaLabs/api-confirmation/internal/configuration"
 	"github.com/AlpacaLabs/api-confirmation/internal/db"
 	goKafka "github.com/AlpacaLabs/go-kafka"
+	accountV1 "github.com/AlpacaLabs/protorepo-account-go/alpacalabs/account/v1"
 	hermesV1 "github.com/AlpacaLabs/protorepo-hermes-go/alpacalabs/hermes/v1"
 	"github.com/segmentio/kafka-go"
 	log "github.com/sirupsen/logrus"
@@ -18,7 +21,7 @@ import (
 // As described in the docs: https://microservices.io/patterns/data/transactional-outbox.html
 // "A separate Message Relay process publishes the events inserted into database to a message broker."
 
-func ReadFromTransactionalOutbox(config configuration.Config, dbClient db.Client) {
+func ReadFromTransactionalOutbox(config configuration.Config, dbClient db.Client, accountConn *grpc.ClientConn) {
 	topic := hermesTopics.TopicForSendEmailRequest
 	brokers := []string{
 		fmt.Sprintf("%s:%d", config.KafkaConfig.Host, config.KafkaConfig.Port),
@@ -44,8 +47,15 @@ func ReadFromTransactionalOutbox(config configuration.Config, dbClient db.Client
 
 			log.Infof("Looking up email address for email code: %s", emailCode.Id)
 
-			// TODO call Account service to get actual email address
-			//emailCode.EmailAddressId
+			var emailAddress string
+			accountClient := accountV1.NewAccountServiceClient(accountConn)
+			if emailRes, err := accountClient.GetEmailAddress(ctx, &accountV1.GetEmailAddressRequest{
+				Id: emailCode.EmailAddressId,
+			}); err != nil {
+				return fmt.Errorf("failed to verify email address existence: %w", err)
+			} else {
+				emailAddress = emailRes.EmailAddress.EmailAddress
+			}
 
 			pb := &hermesV1.SendEmailRequest{
 				// TODO build actual email body to let them know they should confirm their account
@@ -68,9 +78,11 @@ func ReadFromTransactionalOutbox(config configuration.Config, dbClient db.Client
 						},
 						Signature: "Welcome",
 					},
-					To:  nil,
-					Cc:  nil,
-					Bcc: nil,
+					To: []*hermesV1.Recipient{
+						{
+							Email: emailAddress,
+						},
+					},
 				},
 			}
 

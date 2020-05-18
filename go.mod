@@ -9,9 +9,11 @@ require (
 	github.com/AlpacaLabs/go-kontext v0.0.0-20200518020453-f209c8f366fc
 	github.com/AlpacaLabs/go-random-code v0.0.0-20200505155937-a738e97db13f
 	github.com/AlpacaLabs/go-timestamp v0.0.0-20200502002453-181df3ead2e7
+	github.com/AlpacaLabs/protorepo-account-go v0.0.0-20200515160225-7d122739336d
 	github.com/AlpacaLabs/protorepo-confirmation-go v0.0.0-20200515223429-b7bc28792a75
 	github.com/AlpacaLabs/protorepo-event-go v0.0.0-20200517012157-817122666c68
 	github.com/AlpacaLabs/protorepo-hermes-go v0.0.0-20200504021841-28421f772c4d
+	github.com/AlpacaLabs/protorepo-pagination-go v0.0.0-20200503181518-cbf4b2f30657 // indirect
 	github.com/gorilla/mux v1.7.4
 	github.com/jackc/pgx/v4 v4.6.0
 	github.com/rs/xid v1.2.1

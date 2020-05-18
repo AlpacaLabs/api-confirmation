@@ -3,6 +3,8 @@ package app
 import (
 	"sync"
 
+	"github.com/AlpacaLabs/go-kontext"
+
 	"github.com/AlpacaLabs/api-confirmation/internal/async"
 
 	"github.com/AlpacaLabs/api-confirmation/internal/grpc"
@@ -25,11 +27,22 @@ func NewApp(c configuration.Config) App {
 }
 
 func (a App) Run() {
-	dbConn, err := db.Connect(a.config.SQLConfig)
+	config := a.config
+
+	// Connect to database
+	dbConn, err := db.Connect(config.SQLConfig)
 	if err != nil {
 		log.Fatalf("failed to dial database: %v", err)
 	}
 	dbClient := db.NewClient(dbConn)
+
+	// Connect to Account service
+	accountConn, err := kontext.Dial(config.AccountGRPCAddress)
+	if err != nil {
+		log.Fatalf("failed to dial Account service: %v", err)
+	}
+
+	// Create our service layer
 	svc := service.NewService(a.config, dbClient)
 
 	var wg sync.WaitGroup
@@ -47,6 +60,9 @@ func (a App) Run() {
 
 	wg.Add(1)
 	go async.HandleCreatePhoneNumberCode(a.config, svc)
+
+	wg.Add(1)
+	go async.ReadFromTransactionalOutbox(a.config, dbClient, accountConn)
 
 	wg.Wait()
 }
