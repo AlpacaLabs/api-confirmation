@@ -62,7 +62,10 @@ func (a App) Run() {
 	go async.HandleCreatePhoneNumberCode(a.config, svc)
 
 	wg.Add(1)
-	go async.RelayMessagesToHermes(a.config, dbClient, accountConn)
+	go async.RelayMessagesForSendEmail(a.config, dbClient, accountConn)
+
+	wg.Add(1)
+	go async.RelayMessagesForSendSms(a.config, dbClient, accountConn)
 
 	wg.Wait()
 }

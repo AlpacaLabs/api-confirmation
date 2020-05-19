@@ -12,12 +12,12 @@ import (
 	"google.golang.org/grpc"
 )
 
-type relayMessageToHermesInput struct {
+type relayMessageForSendEmailInput struct {
 	accountConn *grpc.ClientConn
 	relayMessageInput
 }
 
-func relayMessageToHermes(in relayMessageToHermesInput) db.TransactionFunc {
+func relayMessageForSendEmail(in relayMessageForSendEmailInput) db.TransactionFunc {
 	accountConn := in.accountConn
 	writer := in.writer
 	topic := in.topic
@@ -28,17 +28,17 @@ func relayMessageToHermes(in relayMessageToHermesInput) db.TransactionFunc {
 			return fmt.Errorf("failed to read event from transactional outbox for sending emails: %w", err)
 		}
 
-		emailCode, err := tx.GetEmailCodeByID(ctx, e.CodeID)
+		codeEntity, err := tx.GetEmailCodeByID(ctx, e.CodeID)
 		if err != nil {
 			return err
 		}
 
-		log.Infof("Looking up email address for email code: %s", emailCode.Id)
+		log.Infof("Looking up email address for email code: %s", codeEntity.Id)
 
 		var emailAddress string
 		accountClient := accountV1.NewAccountServiceClient(accountConn)
 		if emailRes, err := accountClient.GetEmailAddress(ctx, &accountV1.GetEmailAddressRequest{
-			Id: emailCode.EmailAddressId,
+			Id: codeEntity.EmailAddressId,
 		}); err != nil {
 			return fmt.Errorf("failed to verify email address existence: %w", err)
 		} else {
