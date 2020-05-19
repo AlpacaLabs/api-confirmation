@@ -15,11 +15,11 @@ const (
 	TopicForPhoneNumberConfirmation  = "create-phone-number-confirmation-code-request"
 )
 
-func HandleCreateEmailAddressCode(config configuration.Config, s service.Service) {
+func ConsumeTopicForEmailCodeCreation(config configuration.Config, s service.Service) {
 	readFromTopic(TopicForEmailAddressConfirmation, config, handleCreateEmailAddressCode(s))
 }
 
-func HandleCreatePhoneNumberCode(config configuration.Config, s service.Service) {
+func ConsumeTopicForPhoneCodeCreation(config configuration.Config, s service.Service) {
 	readFromTopic(TopicForPhoneNumberConfirmation, config, handleCreatePhoneNumberCode(s))
 }
 

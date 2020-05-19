@@ -56,10 +56,10 @@ func (a App) Run() {
 	go grpcServer.Run()
 
 	wg.Add(1)
-	go async.HandleCreateEmailAddressCode(a.config, svc)
+	go async.ConsumeTopicForEmailCodeCreation(a.config, svc)
 
 	wg.Add(1)
-	go async.HandleCreatePhoneNumberCode(a.config, svc)
+	go async.ConsumeTopicForPhoneCodeCreation(a.config, svc)
 
 	wg.Add(1)
 	go async.RelayMessagesForSendEmail(a.config, dbClient, accountConn)
