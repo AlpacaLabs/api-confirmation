@@ -17,13 +17,13 @@ const (
 	flagForGrpcPort = "grpc_port"
 	flagForHTTPPort = "http_port"
 
-	flagForAccountGrpcAddress = "account_service_address"
-	flagForAccountGrpcHost    = "account_service_host"
-	flagForAccountGrpcPort    = "account_service_port_grpc"
+	flagForAccountGrpcAddress = "api_account_service_address"
+	flagForAccountGrpcHost    = "api_account_service_host"
+	flagForAccountGrpcPort    = "api_account_service_port_grpc"
 
-	flagForHermesGrpcAddress = "hermes_service_address"
-	flagForHermesGrpcHost    = "hermes_service_host"
-	flagForHermesGrpcPort    = "hermes_service_port_grpc"
+	flagForHermesGrpcAddress = "api_hermes_service_address"
+	flagForHermesGrpcHost    = "api_hermes_service_host"
+	flagForHermesGrpcPort    = "api_hermes_service_port_grpc"
 )
 
 type Config struct {
