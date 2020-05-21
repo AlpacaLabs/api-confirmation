@@ -23,8 +23,6 @@ type Transaction interface {
 	CreateEmailCode(ctx context.Context, code confirmationV1.EmailAddressConfirmationCode) error
 	CreatePhoneCode(ctx context.Context, code confirmationV1.PhoneNumberConfirmationCode) error
 
-	GetEmailCodeByID(ctx context.Context, codeID string) (*confirmationV1.EmailAddressConfirmationCode, error)
-	GetPhoneCodeByID(ctx context.Context, codeID string) (*confirmationV1.PhoneNumberConfirmationCode, error)
 	GetEmailCode(ctx context.Context, code confirmationV1.ConfirmEmailAddressRequest) (*confirmationV1.EmailAddressConfirmationCode, error)
 	GetPhoneCode(ctx context.Context, code confirmationV1.ConfirmPhoneNumberRequest) (*confirmationV1.PhoneNumberConfirmationCode, error)
 
@@ -79,44 +77,6 @@ VALUES($1, $2, $3, $4, $5, $6, $7)
 	_, err := tx.tx.Exec(ctx, query, c.ID, c.Code, c.CreatedAt, c.ExpiresAt, c.Stale, c.Used, c.PhoneNumberID)
 
 	return err
-}
-
-func (tx *txImpl) GetEmailCodeByID(ctx context.Context, codeID string) (*confirmationV1.EmailAddressConfirmationCode, error) {
-	queryTemplate := `
-SELECT id, code, created_at, expires_at, stale, used, email_address_id
- FROM %s
- WHERE id = $1
-`
-
-	query := fmt.Sprintf(queryTemplate, TableForEmailCode)
-	var c entities.EmailAddressConfirmationCode
-	row := tx.tx.QueryRow(ctx, query, codeID)
-
-	err := row.Scan(&c.ID, &c.Code, &c.CreatedAt, &c.ExpiresAt, &c.Stale, &c.Used, &c.EmailAddressID)
-	if err != nil {
-		return nil, err
-	}
-
-	return c.ToProtobuf(), nil
-}
-
-func (tx *txImpl) GetPhoneCodeByID(ctx context.Context, codeID string) (*confirmationV1.PhoneNumberConfirmationCode, error) {
-	queryTemplate := `
-SELECT id, code, created_at, expires_at, stale, used, phone_number_id
- FROM %s
- WHERE id = $1
-`
-
-	query := fmt.Sprintf(queryTemplate, TableForPhoneCode)
-	var c entities.PhoneNumberConfirmationCode
-	row := tx.tx.QueryRow(ctx, query, codeID)
-
-	err := row.Scan(&c.ID, &c.Code, &c.CreatedAt, &c.ExpiresAt, &c.Stale, &c.Used, &c.PhoneNumberID)
-	if err != nil {
-		return nil, err
-	}
-
-	return c.ToProtobuf(), nil
 }
 
 func (tx *txImpl) GetEmailCode(ctx context.Context, code confirmationV1.ConfirmEmailAddressRequest) (*confirmationV1.EmailAddressConfirmationCode, error) {

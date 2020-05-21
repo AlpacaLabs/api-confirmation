@@ -2,6 +2,9 @@ package service
 
 import (
 	"context"
+	"fmt"
+
+	accountV1 "github.com/AlpacaLabs/protorepo-account-go/alpacalabs/account/v1"
 
 	"github.com/AlpacaLabs/api-confirmation/internal/db"
 	"github.com/AlpacaLabs/api-confirmation/internal/db/entities"
@@ -9,8 +12,10 @@ import (
 )
 
 func (s Service) ConfirmEmailAddress(ctx context.Context, request *confirmationV1.ConfirmEmailAddressRequest) (*confirmationV1.ConfirmEmailAddressResponse, error) {
-	if err := s.dbClient.RunInTransaction(ctx, func(ctx context.Context, tx db.Transaction) error {
+	funcName := "ConfirmEmailAddress"
+	transactionalOutboxTable := db.TableForConfirmEmailAddressRequest
 
+	if err := s.dbClient.RunInTransaction(ctx, func(ctx context.Context, tx db.Transaction) error {
 		// Verify the code is valid
 		codeEntity, err := tx.GetEmailCode(ctx, *request)
 		if err != nil {
@@ -29,10 +34,20 @@ func (s Service) ConfirmEmailAddress(ctx context.Context, request *confirmationV
 			return err
 		}
 
-		// Write to transactional outbox so a message relay
-		// can mark the email address as confirmed in the
-		// Account Service.
-		return tx.CreateEventForEmailConfirmation(ctx, entities.NewConfirmEmailEvent(ctx, emailAddressID))
+		// Create the protocol buffer that the Message Relay process
+		// will use as a payload in a Kafka topic.
+		payload := &accountV1.ConfirmEmailAddressRequest{
+			EmailAddressId: emailAddressID,
+		}
+
+		// Create the event entity that will be persisted to the transactional outbox
+		event, err := entities.NewEvent(ctx, request, payload)
+		if err != nil {
+			return fmt.Errorf("failed to create event in %s: %w", funcName, err)
+		}
+
+		// Persist the event to the transactional outbox
+		return tx.CreateEvent(ctx, event, transactionalOutboxTable)
 	}); err != nil {
 		return nil, err
 	}
@@ -41,8 +56,10 @@ func (s Service) ConfirmEmailAddress(ctx context.Context, request *confirmationV
 }
 
 func (s Service) ConfirmPhoneNumber(ctx context.Context, request *confirmationV1.ConfirmPhoneNumberRequest) (*confirmationV1.ConfirmPhoneNumberResponse, error) {
-	if err := s.dbClient.RunInTransaction(ctx, func(ctx context.Context, tx db.Transaction) error {
+	funcName := "ConfirmPhoneNumber"
+	transactionalOutboxTable := db.TableForConfirmPhoneNumberRequest
 
+	if err := s.dbClient.RunInTransaction(ctx, func(ctx context.Context, tx db.Transaction) error {
 		// Verify the code is valid
 		codeEntity, err := tx.GetPhoneCode(ctx, *request)
 		if err != nil {
@@ -61,10 +78,20 @@ func (s Service) ConfirmPhoneNumber(ctx context.Context, request *confirmationV1
 			return err
 		}
 
-		// Write to transactional outbox so a message relay
-		// can mark the phone number as confirmed in the
-		// Account Service.
-		return tx.CreateEventForPhoneConfirmation(ctx, entities.NewConfirmPhoneEvent(ctx, phoneNumberID))
+		// Create the protocol buffer that the Message Relay process
+		// will use as a payload in a Kafka topic.
+		payload := &accountV1.ConfirmPhoneNumberRequest{
+			PhoneNumberId: phoneNumberID,
+		}
+
+		// Create the event entity that will be persisted to the transactional outbox
+		event, err := entities.NewEvent(ctx, request, payload)
+		if err != nil {
+			return fmt.Errorf("failed to create event in %s: %w", funcName, err)
+		}
+
+		// Persist the event to the transactional outbox
+		return tx.CreateEvent(ctx, event, transactionalOutboxTable)
 	}); err != nil {
 		return nil, err
 	}

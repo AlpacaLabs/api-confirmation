@@ -43,7 +43,7 @@ func (a App) Run() {
 	}
 
 	// Create our service layer
-	svc := service.NewService(a.config, dbClient)
+	svc := service.NewService(a.config, dbClient, accountConn)
 
 	var wg sync.WaitGroup
 
@@ -62,10 +62,10 @@ func (a App) Run() {
 	go async.ConsumeTopicForPhoneCodeCreation(a.config, svc)
 
 	wg.Add(1)
-	go async.RelayMessagesForSendEmail(a.config, dbClient, accountConn)
+	go async.RelayMessagesForSendEmail(a.config, dbClient)
 
 	wg.Add(1)
-	go async.RelayMessagesForSendSms(a.config, dbClient, accountConn)
+	go async.RelayMessagesForSendSms(a.config, dbClient)
 
 	wg.Wait()
 }
