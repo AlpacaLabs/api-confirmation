@@ -67,5 +67,11 @@ func (a App) Run() {
 	wg.Add(1)
 	go async.RelayMessagesForSendSms(a.config, dbClient)
 
+	wg.Add(1)
+	go async.RelayMessagesForConfirmEmail(a.config, dbClient)
+
+	wg.Add(1)
+	go async.RelayMessagesForConfirmPhone(a.config, dbClient)
+
 	wg.Wait()
 }

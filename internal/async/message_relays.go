@@ -19,3 +19,19 @@ func RelayMessagesForSendSms(config configuration.Config, dbClient db.Client) {
 		transactionalOutboxTable: db.TableForSendSmsRequest,
 	})
 }
+
+func RelayMessagesForConfirmEmail(config configuration.Config, dbClient db.Client) {
+	relayMessages(config, dbClient, relayMessagesInput{
+		// TODO get topic name from Account service
+		topic:                    "confirm-email-request",
+		transactionalOutboxTable: db.TableForConfirmEmailAddressRequest,
+	})
+}
+
+func RelayMessagesForConfirmPhone(config configuration.Config, dbClient db.Client) {
+	relayMessages(config, dbClient, relayMessagesInput{
+		// TODO get topic name from Account service
+		topic:                    "confirm-phone-request",
+		transactionalOutboxTable: db.TableForConfirmPhoneNumberRequest,
+	})
+}
