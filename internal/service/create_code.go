@@ -47,7 +47,7 @@ func (s Service) CreateEmailAddressConfirmationCode(ctx context.Context, traceIn
 		}
 
 		// Create the event entity that will be persisted to the transactional outbox
-		event, err := entities.NewEvent(ctx, request, payload)
+		event, err := entities.NewEvent(traceInfo, request, payload)
 		if err != nil {
 			return fmt.Errorf("failed to create event in %s: %w", funcName, err)
 		}
@@ -81,7 +81,7 @@ func (s Service) CreatePhoneNumberConfirmationCode(ctx context.Context, traceInf
 		}
 
 		// Create the event entity that will be persisted to the transactional outbox
-		event, err := entities.NewEvent(ctx, request, payload)
+		event, err := entities.NewEvent(traceInfo, request, payload)
 		if err != nil {
 			return fmt.Errorf("failed to create event in %s: %w", funcName, err)
 		}

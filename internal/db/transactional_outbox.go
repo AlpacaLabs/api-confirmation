@@ -9,8 +9,6 @@ import (
 )
 
 const (
-	// TableForSendEmailRequest is the name of the transactional outbox (database table)
-	// from which we read "jobs" or "events" that need to get sent to a message broker.
 	TableForSendEmailRequest = "txob_send_email_request"
 	TableForSendSmsRequest   = "txob_send_sms_request"
 

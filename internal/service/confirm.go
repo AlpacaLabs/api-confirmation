@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/AlpacaLabs/go-kontext"
+
 	accountV1 "github.com/AlpacaLabs/protorepo-account-go/alpacalabs/account/v1"
 
 	"github.com/AlpacaLabs/api-confirmation/internal/db"
@@ -40,8 +42,10 @@ func (s Service) ConfirmEmailAddress(ctx context.Context, request *confirmationV
 			EmailAddressId: emailAddressID,
 		}
 
+		traceInfo := kontext.GetTraceInfo(ctx)
+
 		// Create the event entity that will be persisted to the transactional outbox
-		event, err := entities.NewEvent(ctx, request, payload)
+		event, err := entities.NewEvent(traceInfo, request, payload)
 		if err != nil {
 			return fmt.Errorf("failed to create event in %s: %w", funcName, err)
 		}
@@ -84,8 +88,10 @@ func (s Service) ConfirmPhoneNumber(ctx context.Context, request *confirmationV1
 			PhoneNumberId: phoneNumberID,
 		}
 
+		traceInfo := kontext.GetTraceInfo(ctx)
+
 		// Create the event entity that will be persisted to the transactional outbox
-		event, err := entities.NewEvent(ctx, request, payload)
+		event, err := entities.NewEvent(traceInfo, request, payload)
 		if err != nil {
 			return fmt.Errorf("failed to create event in %s: %w", funcName, err)
 		}

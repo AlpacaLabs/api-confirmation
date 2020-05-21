@@ -1,11 +1,7 @@
 package entities
 
 import (
-	"context"
-
 	"github.com/golang/protobuf/proto"
-
-	"github.com/AlpacaLabs/go-kontext"
 
 	eventV1 "github.com/AlpacaLabs/protorepo-event-go/alpacalabs/event/v1"
 	"github.com/rs/xid"
@@ -19,10 +15,8 @@ type Event struct {
 	Payload  []byte
 }
 
-func NewEvent(ctx context.Context, catalyst, payload proto.Message) (Event, error) {
+func NewEvent(traceInfo eventV1.TraceInfo, catalyst, payload proto.Message) (Event, error) {
 	var empty Event
-
-	traceInfo := kontext.GetTraceInfo(ctx)
 
 	catalystBytes, err := proto.Marshal(catalyst)
 	if err != nil {
